@@ -21,26 +21,13 @@ namespace Tasks
     {
         private DoublyLinkedListNode<T> head;
         private DoublyLinkedListNode<T> tail;
+        private int length;
 
         public int Length
         {
             get
             {
-                if (head == null)
-                {
-                    return 0;
-                }
-
-                var current = head;
-                var count = 1;
-
-                while (current.Next != null)
-                {
-                    count++;
-                    current = current.Next;
-                }
-
-                return count;
+                return length;
             }
         }
 
@@ -57,45 +44,35 @@ namespace Tasks
                 newNode.Prev = tail;
                 tail = newNode;
             }
+
+            length++;
         }
 
         public void AddAt(int index, T e)
         {
             var newNode = new DoublyLinkedListNode<T>(e);
 
-            if (head == null)
+            if (head == null || index == length)
             {
                 Add(e);
                 return;
             }
 
-            if (index == 0)
-            {
-                head.Prev = newNode;
-                newNode.Next = head;
-                head = newNode;
-
-                return;
-            }
-
-            if (index == this.Length)
-            {
-                newNode.Prev = tail;
-                tail.Next = newNode;
-                tail = newNode;
-
-                return;
-            }
-
             var node = NodeAt(index);
-            newNode.Prev = node.Prev;
+
             newNode.Next = node;
+            newNode.Prev = node.Prev;
             node.Prev = newNode;
 
             if (newNode.Prev != null)
             {
                 newNode.Prev.Next = newNode;
+            } else
+            {
+                head = newNode;
             }
+
+            length++;
         }
 
         public T ElementAt(int index)
@@ -113,21 +90,25 @@ namespace Tasks
         {
             Func<DoublyLinkedListNode<T>, int, bool> predicate = (DoublyLinkedListNode<T> node, int index) => node.Value.Equals(item);
 
-            RemoveNode(predicate);
-
+            if (RemoveNode(predicate) != null)
+            {
+                length--;
+            }
         }
 
         public T RemoveAt(int index)
         {
-            if (index < 0 || index >= Length)
+            if (index < 0 || index >= length)
             {
                 throw new IndexOutOfRangeException("");
             }
 
-
             Func<DoublyLinkedListNode<T>, int, bool> predicate = (DoublyLinkedListNode<T> node, int nodeIndex) => nodeIndex == index;
 
             var removed = RemoveNode(predicate);
+            length--;
+
+
             return removed!.Value;
         }
 
